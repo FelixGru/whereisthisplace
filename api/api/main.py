@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .routes.predict import router as predict_router
+
 app = FastAPI()
 
 # Allow all origins for now. The Flutter app will run on a different port
@@ -11,6 +13,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(predict_router)
 
 @app.get("/")
 def read_root():
