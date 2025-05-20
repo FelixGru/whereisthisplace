@@ -1,11 +1,16 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../models/result_model.dart';
+import '../services/api.dart';
+import 'result.dart';
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Api api;
+  const HomeScreen({super.key, Api? api}) : api = api ?? Api();
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,6 +19,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   XFile? _image;
   bool _loading = false;
+
+  @visibleForTesting
+  void setImageForTest(XFile file) {
+    setState(() {
+      _image = file;
+    });
+  }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -29,11 +41,17 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _loading = true;
     });
-    await Future.delayed(const Duration(seconds: 1));
+    final result = await widget.api.locate(File(_image!.path));
     if (!mounted) return;
     setState(() {
       _loading = false;
     });
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ResultScreen(result: result),
+      ),
+    );
   }
 
   Widget _buildImagePreview() {
