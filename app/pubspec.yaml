@@ -35,6 +35,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   image_picker: ^1.0.4
+  mapbox_gl: ^0.18.0 # newer version without deprecated hashValues
+  share_plus: ^7.2.1
+
+dependency_overrides:
+  mapbox_gl_platform_interface: ^0.18.0
 
 dev_dependencies:
   flutter_test:
