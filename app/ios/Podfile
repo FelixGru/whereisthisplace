@@ -38,6 +38,16 @@ end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+<<<<<<< HEAD
     flutter_additional_ios_build_settings(target)
+=======
+    # Flutter’s default tweaks
+    flutter_additional_ios_build_settings(target)
+
+    # Fix: Mapbox dylib is arm64-device only → exclude that slice for simulators
+    target.build_configurations.each do |config|
+      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+    end
+>>>>>>> 952dac2632a2265249a68c24e74ef7ac88bbdb25
   end
 end
