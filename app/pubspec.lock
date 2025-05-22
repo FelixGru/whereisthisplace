@@ -184,6 +184,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+<<<<<<< HEAD
+=======
   image:
     dependency: transitive
     description:
@@ -192,6 +194,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0"
+>>>>>>> 952dac2632a2265249a68c24e74ef7ac88bbdb25
   image_picker:
     dependency: "direct main"
     description:
@@ -256,6 +259,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
+<<<<<<< HEAD
+=======
   js:
     dependency: transitive
     description:
@@ -264,6 +269,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+>>>>>>> 952dac2632a2265249a68c24e74ef7ac88bbdb25
   leak_tracker:
     dependency: transitive
     description:
@@ -299,6 +305,12 @@ packages:
   mapbox_gl:
     dependency: "direct main"
     description:
+<<<<<<< HEAD
+      path: "../mapbox_gl_stub"
+      relative: true
+    source: path
+    version: "0.0.1"
+=======
       path: "."
       ref: master
       resolved-ref: "4a09cc4401bb77e900f005cc1e2f712193b997af"
@@ -331,6 +343,7 @@ packages:
       url: "https://github.com/tobrun/flutter-mapbox-gl.git"
     source: git
     version: "0.16.0"
+>>>>>>> 952dac2632a2265249a68c24e74ef7ac88bbdb25
   matcher:
     dependency: transitive
     description:
@@ -419,6 +432,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+<<<<<<< HEAD
+=======
   petitparser:
     dependency: transitive
     description:
@@ -427,6 +442,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+>>>>>>> 952dac2632a2265249a68c24e74ef7ac88bbdb25
   platform:
     dependency: transitive
     description:
@@ -608,6 +624,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+<<<<<<< HEAD
+=======
   xml:
     dependency: transitive
     description:
@@ -616,6 +634,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
+>>>>>>> 952dac2632a2265249a68c24e74ef7ac88bbdb25
 sdks:
   dart: ">=3.7.2 <4.0.0"
   flutter: ">=3.27.0"

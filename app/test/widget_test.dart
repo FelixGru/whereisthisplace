@@ -8,8 +8,8 @@ import 'package:app/main.dart';
 import 'package:app/screens/home.dart';
 import 'package:app/services/api.dart';
 import 'package:app/models/result_model.dart';
+
 import 'package:mapbox_gl/mapbox_gl.dart';
-import 'package:image_picker/image_picker.dart';
 
 void main() {
   testWidgets('Home screen has expected widgets', (WidgetTester tester) async {
@@ -33,7 +33,9 @@ void main() {
 
     expect(find.byKey(const Key('confidence_text')), findsOneWidget);
     expect(find.byKey(const Key('share_button')), findsOneWidget);
+    
     expect(find.byType(MapboxMap), findsOneWidget);
+ main
   });
 }
 

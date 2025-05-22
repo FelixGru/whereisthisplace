@@ -35,11 +35,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   image_picker: ^1.0.4
-  mapbox_gl:
-      git:
-        url: https://github.com/tobrun/flutter-mapbox-gl.git
-        ref: master 
+
+  mapbox_gl: ^0.16.0 # Using stubbed implementation for tests
   share_plus: ^7.2.1
+
+dependency_overrides:
+  mapbox_gl:
+    path: ../mapbox_gl_stub
 
 dev_dependencies:
   flutter_test:
