@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mapbox_gl/mapbox_gl.dart';
+import '../widgets/map_widget.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../models/result_model.dart';
@@ -32,19 +32,9 @@ class ResultScreen extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: MapboxMap(
-              accessToken: 'YOUR_MAPBOX_ACCESS_TOKEN',
-              initialCameraPosition: CameraPosition(
-                target: LatLng(result.latitude, result.longitude),
-                zoom: 12,
-              ),
-              onMapCreated: (controller) {
-                controller.addSymbol(
-                  SymbolOptions(
-                    geometry: LatLng(result.latitude, result.longitude),
-                  ),
-                );
-              },
+            child: MapWidget(
+              latitude: result.latitude,
+              longitude: result.longitude,
             ),
           ),
           Padding(

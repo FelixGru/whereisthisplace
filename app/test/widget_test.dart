@@ -15,7 +15,7 @@ import 'package:app/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:app/models/result_model.dart';
-import 'package:mapbox_gl/mapbox_gl.dart';
+import 'package:app/widgets/map_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -58,7 +58,7 @@ void main() {
 
     expect(find.byKey(const Key('confidence_text')), findsOneWidget);
     expect(find.byKey(const Key('share_button')), findsOneWidget);
-    expect(find.byType(MapboxMap), findsOneWidget);
+    expect(find.byType(MapWidget), findsOneWidget);
   });
 
 }
