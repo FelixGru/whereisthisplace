@@ -1,16 +1,16 @@
 import sys
 from pathlib import Path
 
-# When this file is /app/api/api/main.py, ROOT becomes /app
-ROOT = Path(__file__).resolve().parents[2]
+# When this file is /app/api/main.py, ROOT becomes /app
+ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT)) # Ensures /app is in sys.path
+    sys.path.append(str(ROOT))  # Ensure project root is on sys.path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes.predict import router as predict_router
 # Corrected import for middleware:
-from api.api.middleware import EphemeralUploadMiddleware, RateLimitMiddleware
+from api.middleware import EphemeralUploadMiddleware, RateLimitMiddleware
 
 app = FastAPI()
 
