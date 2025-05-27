@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: where-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: whereisthisplace
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - whereisthisplace-network
+
+  backend:
+    image: 726580147864.dkr.ecr.eu-central-1.amazonaws.com/where-backend:latest
+    container_name: where-backend-gpu
+    runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/whereisthisplace
+      TORCHSERVE_URL: http://localhost:8080
+      MAPBOX_TOKEN: ${MAPBOX_TOKEN}
+      PYTHONUNBUFFERED: 1
+      PYTHONPATH: /app
+      TORCHSERVE_CONFIG_FILE: /app/config/config.properties # This is used by the script below
+      LOG_LEVEL: INFO
+    volumes:
+      - ./api:/app/api:rw
+      - ./ml:/app/ml:rw
+      - ./scripts:/app/scripts:rw
+      - ./logs:/app/logs:rw
+      # - ./models:/model-store:ro # Keep commented to use models from the image
+      - ./config:/app/config:ro   # Host's ./config/ is mounted here. CRITICAL: ./config/config.properties must exist on host.
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: /bin/bash
+    command:
+      - "-c"
+      - |
+        echo '=== Backend Service Starting (Script Version 6) ==='
+        echo "Running as user: $(whoami)"
+        
+        # Set PYTHONPATH for the script environment and subsequent commands
+        # Docker Compose 'environment: PYTHONPATH: /app' should make /app available to Python.
+        export PYTHONPATH="/app:${PYTHONPATH}" # Prepend /app to allow 'import api.main'
+        echo "SCRIPT PYTHONPATH effectively set to: ${PYTHONPATH}"
+
+        echo 'Ensuring package structure for FastAPI app...'
+        mkdir -p /app/api/api
+        touch /app/api/__init__.py
+        touch /app/api/api/__init__.py
+        echo "Listing content of /app/api for context:"
+        ls -lR /app/api
+
+        echo 'Installing/Verifying required Python packages in /home/venv/...'
+        /home/venv/bin/pip3 install --no-cache-dir requests fastapi uvicorn psycopg2-binary pgvector
+        
+        echo 'Starting TorchServe...'
+        # Directly use the TORCHSERVE_CONFIG_FILE env var set by Docker Compose.
+        # This var should point to /app/config/config.properties
+        echo "TorchServe will use config file from env var: '${TORCHSERVE_CONFIG_FILE}'"
+
+        if [ -z "${TORCHSERVE_CONFIG_FILE}" ]; then
+            # This block should ideally not be hit if docker-compose 'environment' sets the var.
+            echo "CRITICAL WARNING: TORCHSERVE_CONFIG_FILE is seen as empty by the script." >&2
+            echo "Attempting to use hardcoded default: /app/config/config.properties and expecting it to exist from host mount." >&2
+            EFFECTIVE_TS_CONFIG="/app/config/config.properties"
+        else
+            EFFECTIVE_TS_CONFIG="${TORCHSERVE_CONFIG_FILE}"
+        fi
+        
+        echo "Final path for TorchServe config: ${EFFECTIVE_TS_CONFIG}"
+        if [ ! -f "${EFFECTIVE_TS_CONFIG}" ]; then
+            echo "ERROR: TorchServe config file '${EFFECTIVE_TS_CONFIG}' does not exist." >&2
+            echo "Ensure ./config/config.properties exists on your host and is mounted to /app/config/config.properties." >&2
+            echo "Attempting to start TorchServe without explicit --ts-config (will use defaults which might be problematic)..." >&2
+            torchserve --start --ncs --model-store /model-store --models all
+        else
+            echo "Using TorchServe config file: ${EFFECTIVE_TS_CONFIG}"
+            torchserve --start --ncs --model-store /model-store --models all --ts-config "${EFFECTIVE_TS_CONFIG}"
+        fi
+        
+        echo "Listing contents of /model-store (using image's internal models):"
+        ls -l /model-store/
+
+        echo 'Waiting for TorchServe to initialize (30 seconds)...'
+        sleep 30
+        
+        echo 'TorchServe startup initiated. Checking management API...'
+        echo "Querying http://localhost:8081/models (verbose)..."
+        curl -vs http://localhost:8081/models
+        echo
+        echo "Querying http://localhost:8081/ping (verbose, 404 is often expected default)..."
+        curl -vs http://localhost:8081/ping
+        echo
+
+        echo 'Starting FastAPI application from api.main:app ...'
+        cd /app
+        echo "Working directory for FastAPI start: $(pwd)"
+        echo "PYTHONPATH for Uvicorn (from env, should include /app): ${PYTHONPATH}"
+        /home/venv/bin/python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000 --log-level info
+    networks:
+      - whereisthisplace-network
+
+  adminer:
+    image: adminer
+    container_name: where-adminer
+    ports:
+      - "8090:8080"
+    depends_on:
+      - postgres
+    networks:
+      - whereisthisplace-network
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  whereisthisplace-network:
+    driver: bridge
