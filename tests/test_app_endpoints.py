@@ -30,7 +30,9 @@ def test_health_endpoint_returns_200():
     client = get_fresh_client()
     resp = client.get("/health")
     assert resp.status_code == 200
-    assert resp.json() == {"status": "ok"}
+    data = resp.json()
+    assert data.get("fastapi_status") == "healthy"
+    assert "torchserve_status" in data
 
 
 def test_predict_returns_expected_data():
