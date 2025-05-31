@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../providers/geo_provider.dart';
+import '../providers/settings_provider.dart';
 import 'result.dart';
 import 'settings.dart';
 import '../l10n/app_localizations.dart';
@@ -42,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _loading = true;
     });
     final geo = context.read<GeoProvider>();
-    final result = await geo.locate(File(_image!.path));
+    final settings = context.read<SettingsProvider>();
+    final result = await geo.locate(File(_image!.path), settings.engine);
     if (!mounted) return;
     setState(() {
       _loading = false;

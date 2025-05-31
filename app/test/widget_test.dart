@@ -7,12 +7,11 @@ import 'dart:typed_data';
 import 'package:app/main.dart';
 import 'package:app/screens/home_screen.dart';
 import 'package:app/screens/settings.dart';
-import 'package:app/services/api.dart';
 import 'package:app/providers/geo_provider.dart';
 import 'package:app/providers/locale_provider.dart';
 import 'package:app/providers/settings_provider.dart';
 import 'package:app/l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:app/models/engine.dart';
 import 'package:provider/provider.dart';
 import 'package:app/models/result_model.dart';
 import 'package:app/widgets/map_widget.dart';
@@ -31,10 +30,15 @@ void main() {
 
   testWidgets('Navigate from home to result page', (WidgetTester tester) async {
     final key = GlobalKey();
-    final api = _FakeApi();
+    final fakeLocate =
+        (File file, Engine engine) async => ResultModel(latitude: 1, longitude: 2, confidence: 0.5);
     await tester.pumpWidget(
-      ChangeNotifierProvider(
-        create: (_) => GeoProvider(api),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => GeoProvider(fakeLocate)),
+          ChangeNotifierProvider(create: (_) => SettingsProvider()),
+          ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ],
         child: MaterialApp(
           localizationsDelegates: const [
             AppLocalizationsDelegate(),
@@ -63,9 +67,3 @@ void main() {
 
 }
 
-class _FakeApi extends Api {
-  @override
-  Future<ResultModel> locate(File file) async {
-    return ResultModel(latitude: 1, longitude: 2, confidence: 0.5);
-  }
-}
