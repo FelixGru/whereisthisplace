@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes.predict import router as predict_router
 from api.middleware import EphemeralUploadMiddleware, RateLimitMiddleware
+from api.db import init_db, close_db
 import requests
 import os
 
@@ -72,4 +73,14 @@ def health_check():
         "torchserve_models": models_data,
         "message": "API is operational",
     }
+
+
+@app.on_event("startup")
+async def startup_event() -> None:
+    await init_db(app)
+
+
+@app.on_event("shutdown")
+async def shutdown_event() -> None:
+    await close_db(app)
 
