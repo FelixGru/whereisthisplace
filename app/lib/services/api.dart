@@ -4,9 +4,10 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 
 import 'package:app/models/result_model.dart';   // ← use the existing model
+import 'package:app/models/engine.dart';
 
 /* ---------- endpoint selection ---------- */
-const _prodHost = '18.184.4.124';
+const _prodHost = '52.28.72.57';
 const _androidEmulatorHost = '10.0.2.2';
 
 final String _baseUrl = (() {
@@ -19,8 +20,9 @@ final String _baseUrl = (() {
 class Api {
   Api._();
 
-  static Future<ResultModel> locate(File image) async {
-    final uri = Uri.parse('$_baseUrl/predict');
+  static Future<ResultModel> locate(File image, Engine engine) async {
+    final query = engine == Engine.openai ? '?mode=openai' : '';
+    final uri = Uri.parse('$_baseUrl/predict$query');
     final req = http.MultipartRequest('POST', uri)
       ..files.add(await http.MultipartFile.fromPath('photo', image.path));
 
