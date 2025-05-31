@@ -23,7 +23,8 @@ services:
       - ./ml:/app/ml:rw                   # Mounts your local 'ml' code
       - ./models:/model-store:ro          # Mounts your local models read-only for TorchServe
       - ./config:/app/config:ro           # Mounts your local 'config' directory (for config.properties) read-only
-    command: /app/api/docker/start.sh     # Explicitly runs the start.sh script
+    command: >
+      bash -c "pip install poetry && cd /app/api && poetry install --no-dev && /app/api/docker/start.sh"     # Install Poetry, install dependencies, then run start.sh
                                           # Ensure host's api/docker/start.sh is executable (`chmod +x api/docker/start.sh`)
                                           # and correctly loads 'where=where.mar' and starts Uvicorn on port 8000.
     depends_on:
