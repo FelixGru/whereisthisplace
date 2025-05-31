@@ -22,6 +22,8 @@ def test_app_is_fastapi_instance():
 class DummyUploadFile:
     def __init__(self, data: bytes):
         self.data = data
+        self.filename = "test.jpg"
+        self.content_type = "image/jpeg"
 
     async def read(self) -> bytes:
         return self.data
