@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/providers/settings_provider.dart';
+import 'package:app/models/engine.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -9,19 +10,19 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  test('defaults to false when no value stored', () async {
+  test('defaults to fastai when no value stored', () async {
     final provider = SettingsProvider();
     await Future.delayed(Duration.zero);
-    expect(provider.sendToLlm, isFalse);
+    expect(provider.engine, Engine.fastai);
   });
 
-  test('toggle persists value', () async {
+  test('setEngine persists value', () async {
     var provider = SettingsProvider();
     await Future.delayed(Duration.zero);
-    await provider.toggleSendToLlm(true);
+    await provider.setEngine(Engine.openai);
 
     provider = SettingsProvider();
     await Future.delayed(Duration.zero);
-    expect(provider.sendToLlm, isTrue);
+    expect(provider.engine, Engine.openai);
   });
 }
