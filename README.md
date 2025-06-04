@@ -71,7 +71,7 @@ bash scripts/run_api.sh
 ```bash
 cd app
 flutter pub get
-flutter run
+flutter run # use --dart-define BACKEND_HOST=10.0.2.2 for emulators
 flutter test
 ```
 
