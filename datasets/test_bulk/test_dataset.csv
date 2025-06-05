@@ -1,0 +1,4 @@
+image,lat,lon,description
+test_paris_bulk.jpg,48.8584,2.2945,Eiffel Tower test for bulk loading
+test_london_bulk.jpg,51.5074,-0.1278,Big Ben test for bulk loading
+test_nyc_bulk.jpg,40.7128,-74.006,NYC test for bulk loading
