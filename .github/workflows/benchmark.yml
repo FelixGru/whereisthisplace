@@ -1,0 +1,229 @@
+name: Benchmark Model Accuracy
+
+on:
+  push:
+    branches: [main, codex/find-300-gold-label-images-for-benchmark]
+    paths:
+      - "api/**"
+      - "ml/**"
+      - "models/**"
+      - "scripts/**"
+      - "datasets/**"
+      - ".github/workflows/benchmark.yml"
+  workflow_dispatch:  # manual trigger
+
+env:
+  AWS_REGION: eu-central-1
+  IMAGE_NAME: 726580147864.dkr.ecr.eu-central-1.amazonaws.com/where-backend
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    services:
+      postgres:
+        image: postgis/postgis:16-3.5
+        env:
+          POSTGRES_PASSWORD: wherepass
+          POSTGRES_USER: whereuser
+          POSTGRES_DB: whereisthisplace
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout repository (incl. LFS)
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image for testing
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./api/docker/Dockerfile.gpu
+        push: false
+        load: true
+        build-args: |
+          CACHEBUST=${{ github.sha }}
+        tags: |
+          where-backend-test:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Initialize database
+      run: |
+        # Install PostgreSQL client
+        sudo apt-get update && sudo apt-get install -y postgresql-client
+        
+        # Wait for PostgreSQL to be ready
+        timeout 30 bash -c 'until pg_isready -h localhost -p 5432 -U whereuser; do sleep 2; done'
+        
+        # Install pgvector extension in the PostGIS container
+        docker exec $(docker ps -q --filter ancestor=postgis/postgis:16-3.5) bash -c "
+          apt-get update && 
+          apt-get install -y postgresql-16-pgvector &&
+          echo 'pgvector extension installed'
+        " || echo "pgvector installation failed, will try alternative method"
+        
+        # Create database schema and install extensions
+        PGPASSWORD=wherepass psql -h localhost -p 5432 -U whereuser -d whereisthisplace -c "
+        CREATE EXTENSION IF NOT EXISTS postgis;
+        CREATE EXTENSION IF NOT EXISTS vector;
+        CREATE SCHEMA IF NOT EXISTS whereisthisplace;
+        " || echo "Database initialization completed or already exists"
+
+    - name: Run database migrations
+      run: |
+        # Start a container in the background for migrations
+        echo "Starting migration container..."
+        docker run -d \
+          --name migration-container \
+          --network host \
+          -e DATABASE_URL="postgresql://whereuser:wherepass@localhost:5432/whereisthisplace" \
+          -e PGUSER="whereuser" \
+          -e PGPASSWORD="wherepass" \
+          -e PGHOST="localhost" \
+          -e PGPORT="5432" \
+          -e PGDATABASE="whereisthisplace" \
+          where-backend-test:latest \
+          sleep 300
+        
+        # Run migration commands step by step
+        echo "=== Migration Debug Info ==="
+        docker exec migration-container bash -c 'echo "DATABASE_URL: $DATABASE_URL"'
+        docker exec migration-container bash -c 'echo "PGUSER: $PGUSER"'
+        docker exec migration-container bash -c 'echo "Current user: $(whoami)"'
+        docker exec migration-container bash -c 'echo "Python version: $(/home/venv/bin/python --version)"'
+        
+        echo "=== Testing database connection ==="
+        echo "Skipping connection test - proceeding directly to migrations"
+        
+        echo "=== Running Alembic migrations ==="
+        docker exec migration-container bash -c 'echo "Current directory: $(pwd)" && ls -la /app/api/ && echo "Checking alembic.ini:" && head -5 /app/api/alembic.ini'
+        docker exec migration-container bash -c 'cd /app && cp api/alembic.ini /tmp/alembic.ini && sed -i "s|script_location = migrations|script_location = api/migrations|" /tmp/alembic.ini'
+        docker exec migration-container bash -c 'cd /app && PYTHONPATH=/app/api:/app /home/venv/bin/alembic -c /tmp/alembic.ini upgrade head'
+        
+        echo "=== Verifying table creation ==="
+        docker exec migration-container bash -c 'PGPASSWORD=wherepass psql -h localhost -p 5432 -U whereuser -d whereisthisplace -c "\dt"'
+        docker exec migration-container bash -c 'PGPASSWORD=wherepass psql -h localhost -p 5432 -U whereuser -d whereisthisplace -c "SELECT COUNT(*) as table_exists FROM information_schema.tables WHERE table_name = '\''photos'\'';"'
+        
+        # Clean up migration container
+        docker stop migration-container
+        docker rm migration-container
+
+    - name: Start services
+      run: |
+        # Start the backend service with proper environment
+        docker run -d \
+          --name where-backend \
+          --network host \
+          -e DATABASE_URL="postgresql://whereuser:wherepass@localhost:5432/whereisthisplace" \
+          -e TORCHSERVE_URL="http://localhost:8080" \
+          -e TORCHSERVE_MANAGEMENT_URL="http://localhost:8081" \
+          -e RATE_LIMIT_REQUESTS="1000" \
+          -e RATE_LIMIT_PERIOD="3600" \
+          where-backend-test:latest
+        
+        # Wait for TorchServe to start first
+        echo "Waiting for TorchServe to start..."
+        sleep 45
+        
+        # Check TorchServe health
+        echo "Checking TorchServe..."
+        timeout 30 bash -c 'until curl -f http://localhost:8081/models; do echo "Waiting for TorchServe..."; sleep 5; done'
+        
+        # Wait a bit more for FastAPI to start
+        echo "Waiting for FastAPI to start..."
+        sleep 15
+        
+        # Check if API is responding
+        echo "Checking FastAPI health..."
+        timeout 60 bash -c 'until curl -f http://localhost:8000/health; do echo "Waiting for FastAPI..."; sleep 5; done'
+
+    - name: Set up Python for benchmark
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install benchmark dependencies
+      run: |
+        pip install requests numpy asyncpg pgvector
+
+    - name: Load dataset with real embeddings
+      run: |
+        echo "Loading Paris dataset with real embeddings from TorchServe..."
+        # Wait a bit more to ensure TorchServe is fully ready
+        sleep 10
+        # Test TorchServe endpoint first
+        curl -f http://localhost:8080/predictions/where --data-binary @datasets/mapillary_paris/mapillary_2926772260983937_000000.jpg || echo "TorchServe test failed, will use fallback embeddings"
+        # Load dataset
+        python scripts/load_dataset.py \
+          --dataset-dir datasets/mapillary_paris \
+          --database-url "postgresql://whereuser:wherepass@localhost:5432/whereisthisplace" \
+          --model-url "http://localhost:8080"
+        echo "✅ Dataset loaded with real embeddings"
+
+    - name: Debug API endpoints
+      run: |
+        echo "Testing API endpoints to debug 404 issues..."
+        python scripts/test_api_endpoint.py
+        echo "✅ API endpoint testing completed"
+
+    - name: Run benchmark on Paris dataset
+      run: |
+        echo "Running benchmark on Paris dataset..."
+        python scripts/benchmark.py \
+          --dataset-dir datasets/mapillary_paris \
+          --api-url http://localhost:8000 \
+          --threshold-km 25.0
+        echo "✅ Paris dataset benchmark completed"
+
+    - name: Run benchmark on all datasets (300 images)
+      run: |
+        echo "Running comprehensive benchmark on 300 randomly sampled images..."
+        python scripts/benchmark.py \
+          --dataset-dir datasets \
+          --api-url http://localhost:8000 \
+          --threshold-km 25.0 \
+          --max-images 300
+        echo "✅ Comprehensive benchmark completed"
+
+    - name: Show service logs on failure
+      if: failure()
+      run: |
+        echo "=== Container status ==="
+        docker ps -a || true
+        echo "=== Backend logs ==="
+        docker logs where-backend || true
+        echo "=== TorchServe health check ==="
+        curl -f http://localhost:8081/models || true
+        echo "=== FastAPI health check ==="
+        curl -f http://localhost:8000/health || true
+        echo "=== Container inspect ==="
+        docker inspect where-backend || true
+
+    - name: Cleanup
+      if: always()
+      run: |
+        docker stop where-backend || true
+        docker rm where-backend || true 

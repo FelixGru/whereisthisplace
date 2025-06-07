@@ -14,15 +14,21 @@ WORKDIR /app
 COPY api/pyproject.toml /app/api/pyproject.toml
 COPY api/poetry.lock /app/api/poetry.lock
 
-# Install Poetry
+# Install Poetry and dependencies to the venv that TorchServe uses
 RUN echo "Cache bust: $CACHEBUST" && \
-    pip install --no-cache-dir poetry
-
-# Configure Poetry and install dependencies for the project in /app/api
-# virtualenvs.create false ensures packages are installed in a way that's
-# accessible to the system python in the image, which uvicorn will use.
-RUN poetry config virtualenvs.create false && \
-    poetry --directory /app/api install --only main --no-interaction --no-root
+    apt-get update && apt-get install -y postgresql-client && \
+    /home/venv/bin/pip install --no-cache-dir poetry && \
+    /home/venv/bin/poetry config virtualenvs.create false && \
+    /home/venv/bin/poetry --directory /app/api install --only main --no-interaction --no-root && \
+    /home/venv/bin/pip install --no-cache-dir uvicorn[standard] fastapi && \
+    /home/venv/bin/pip install --no-cache-dir asyncpg psycopg2-binary sqlalchemy geoalchemy2 pgvector[sqlalchemy] && \
+    /home/venv/bin/pip install --no-cache-dir numpy python-dotenv pydantic-settings requests python-multipart alembic httpx && \
+    echo "Installed packages:" && \
+    /home/venv/bin/pip list | grep -E "(uvicorn|fastapi|asyncpg|psycopg2|sqlalchemy)" && \
+    echo "Python path check:" && \
+    /home/venv/bin/python -c "import uvicorn; print('uvicorn imported successfully')" && \
+    /home/venv/bin/python -c "import fastapi; print('fastapi imported successfully')" && \
+    /home/venv/bin/python -c "import asyncpg; print('asyncpg imported successfully')"
 
 # Copy application code from host's api/ directory to container's /app/api/ directory
 # This means your actual FastAPI app (e.g., main.py) should be in repo_root/api/main.py
@@ -47,8 +53,28 @@ RUN mkdir -p /app/config && \
     echo "model_store=/model-store" >> /app/config/config.properties && \
     echo "load_models=all" >> /app/config/config.properties
 
+# Create logs directory for TorchServe
+RUN mkdir -p /app/logs && \
+    chown -R model-server:model-server /app/logs
+
+# Create startup script for better debugging
+RUN echo '#!/bin/bash' > /app/start.sh && \
+    echo 'set -e' >> /app/start.sh && \
+    echo 'echo "=== Starting services ==="' >> /app/start.sh && \
+    echo 'echo "Python version: $(/home/venv/bin/python --version)"' >> /app/start.sh && \
+    echo 'echo "Checking uvicorn installation..."' >> /app/start.sh && \
+    echo '/home/venv/bin/python -c "import uvicorn; print(f\"uvicorn version: {uvicorn.__version__}\")"' >> /app/start.sh && \
+    echo 'echo "Starting TorchServe..."' >> /app/start.sh && \
+    echo 'torchserve --start --ncs --model-store /model-store --models all --ts-config /app/config/config.properties &' >> /app/start.sh && \
+    echo 'echo "Waiting 30 seconds for TorchServe to start..."' >> /app/start.sh && \
+    echo 'sleep 30' >> /app/start.sh && \
+    echo 'echo "Starting FastAPI..."' >> /app/start.sh && \
+    echo 'cd /app' >> /app/start.sh && \
+    echo '/home/venv/bin/python -m uvicorn api.main:app --host 0.0.0.0 --port 8000' >> /app/start.sh && \
+    chmod +x /app/start.sh && \
+    chown model-server:model-server /app/start.sh
+
 USER model-server
 
-# Start both TorchServe and FastAPI
-# The `cd /app` is important so that `api.main` can be found if PYTHONPATH includes /app.
-CMD ["bash", "-c", "torchserve --start --ncs --model-store /model-store --models all --ts-config /app/config/config.properties & sleep 30 && cd /app && python -m uvicorn api.main:app --host 0.0.0.0 --port 8000"]
+# Start both TorchServe and FastAPI using the startup script
+CMD ["/app/start.sh"]

@@ -33,7 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(EphemeralUploadMiddleware)
-app.add_middleware(RateLimitMiddleware)
+
+# Configure rate limiting based on environment
+# For benchmarking, we need much higher limits
+rate_limit = int(os.getenv('RATE_LIMIT_REQUESTS', '10'))
+rate_period = int(os.getenv('RATE_LIMIT_PERIOD', '86400'))  # 24 hours default
+app.add_middleware(RateLimitMiddleware, limit=rate_limit, period=rate_period)
 
 app.include_router(predict_router)
 

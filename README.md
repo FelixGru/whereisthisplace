@@ -160,6 +160,21 @@ The bulk loader includes:
 - Two processing modes: simplified (default) and batch processing
 - Enhanced Mapillary integration with geographic verification
 
+## Benchmarking
+
+`scripts/benchmark.py` evaluates the API using the gold‑label datasets found
+in `datasets/mapillary_paris*`. These three folders contain a total of 300
+labeled images captured in Paris. The benchmark loads all images, sends them to
+a running `/predict` endpoint and reports the Top‑1 accuracy (within 1&nbsp;km)
+and mean distance error. The script exits with a non‑zero status if accuracy is
+below 70%, allowing CI jobs to fail when the model regresses.
+
+Run it after starting the API:
+
+```bash
+python scripts/benchmark.py --api-url http://localhost:8000
+```
+
 ## Contribution Rules
 
 1. Open an issue before major changes.
