@@ -23,44 +23,68 @@ class SettingsScreen extends StatelessWidget {
     final localeProvider = context.watch<LocaleProvider>();
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context).settings)),
-      body: ListView(
+      body: Column(
         children: [
-          ListTile(
-            title: DropdownButton<Engine>(
-              key: const Key('engine_dropdown'),
-              value: settings.engine,
-              items: const [
-                DropdownMenuItem(
-                  value: Engine.defaultEngine,
-                  child: Text('Default'),
+          Expanded(
+            child: ListView(
+              children: [
+                ListTile(
+                  title: DropdownButton<Engine>(
+                    key: const Key('engine_dropdown'),
+                    value: settings.engine,
+                    items: const [
+                      DropdownMenuItem(
+                        value: Engine.defaultEngine,
+                        child: Text('Default'),
+                      ),
+                      DropdownMenuItem(
+                        value: Engine.openai,
+                        child: Text('OpenAI'),
+                      ),
+                    ],
+                    onChanged: (engine) {
+                      if (engine != null) settings.setEngine(engine);
+                    },
+                  ),
                 ),
-                DropdownMenuItem(
-                  value: Engine.openai,
-                  child: Text('OpenAI'),
+                ListTile(
+                  title: DropdownButton<Locale>(
+                    key: const Key('locale_dropdown'),
+                    value: localeProvider.locale,
+                    items: const [
+                      DropdownMenuItem(value: Locale('en'), child: Text('English')),
+                      DropdownMenuItem(value: Locale('de'), child: Text('Deutsch')),
+                    ],
+                    onChanged: (locale) {
+                      if (locale != null) localeProvider.setLocale(locale);
+                    },
+                  ),
+                ),
+                ListTile(
+                  title: Text(AppLocalizations.of(context).privacyPolicy),
+                  trailing: const Icon(Icons.open_in_new),
+                  onTap: _openPolicy,
                 ),
               ],
-              onChanged: (engine) {
-                if (engine != null) settings.setEngine(engine);
-              },
             ),
           ),
-          ListTile(
-            title: DropdownButton<Locale>(
-              key: const Key('locale_dropdown'),
-              value: localeProvider.locale,
-              items: const [
-                DropdownMenuItem(value: Locale('en'), child: Text('English')),
-                DropdownMenuItem(value: Locale('de'), child: Text('Deutsch')),
+          // Footer with attribution strings
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Divider(),
+                Text(
+                  '© Mapbox, © Mapillary CC-BY-SA 4.0',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
               ],
-              onChanged: (locale) {
-                if (locale != null) localeProvider.setLocale(locale);
-              },
             ),
-          ),
-          ListTile(
-            title: Text(AppLocalizations.of(context).privacyPolicy),
-            trailing: const Icon(Icons.open_in_new),
-            onTap: _openPolicy,
           ),
         ],
       ),
