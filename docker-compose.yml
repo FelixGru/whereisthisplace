@@ -74,6 +74,7 @@ services:
       - ADMINER_DEFAULT_SERVER=postgres
     profiles:
       - tools
+    restart: unless-stopped
 
 volumes:
   postgres-data:

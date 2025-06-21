@@ -29,6 +29,7 @@ services:
         condition: service_healthy       # Waits for PostgreSQL to be healthy before starting
     networks:
       - where-network
+    restart: unless-stopped
     # platform: linux/amd64 # Uncomment if you are on an ARM-based host (e.g., Apple Silicon)
                             # and the image 'where-backend:cpu' is built for AMD64.
                             # For better performance, use or build ARM64-native images if possible.
@@ -52,6 +53,7 @@ services:
       retries: 5
     networks:
       - where-network
+    restart: unless-stopped
     # platform: linux/amd64 # Uncomment if on ARM and this PostGIS image causes issues.
 
   adminer:
@@ -63,6 +65,7 @@ services:
       - postgres # Waits for PostgreSQL to be available
     networks:
       - where-network
+    restart: unless-stopped
     # platform: linux/amd64 # Uncomment if on ARM if needed.
 
   loader:
@@ -80,6 +83,7 @@ services:
         condition: service_healthy
     networks:
       - where-network
+    restart: unless-stopped
 
 volumes:
   postgres-data: # Defines the named volume for PostgreSQL data persistence
