@@ -29,6 +29,7 @@ services:
       retries: 5
     networks:
       - whereisthisplace-network
+    restart: unless-stopped
 
   backend:
     image: where-backend-openai:latest
@@ -121,6 +122,7 @@ services:
           --log-level "$$UVICORN_LOG_LEVEL"
     networks:
       - whereisthisplace-network
+    restart: unless-stopped
 
   adminer:
     image: adminer
@@ -133,6 +135,7 @@ services:
       - whereisthisplace-network
     environment:
       - ADMINER_DEFAULT_SERVER=postgres
+    restart: unless-stopped
 
 volumes:
   postgres_data:
