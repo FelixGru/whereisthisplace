@@ -5,7 +5,7 @@ FROM base AS backend
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
-# ENV PYTHONPATH="/app:${PYTHONPATH}" # PYTHONPATH is already set in your docker-compose.cpu.yml, can be redundant here but harmless
+# ENV PYTHONPATH="/app:${PYTHONPATH}" # PYTHONPATH is already set in docker-compose files, can be redundant here but harmless
 
 # Install system dependencies, including Java for TorchServe
 RUN apt-get update && apt-get install -y \
@@ -58,7 +58,7 @@ EXPOSE 8000
 
 # Command to run the application
 # This CMD will be overridden by the 'command: /app/api/docker/start.sh'
-# in your docker-compose.cpu.yml.
+# in docker-compose files.
 # Having a default CMD is still good practice if the image is run standalone.
 CMD ["/app/api/docker/start.sh"]
 
