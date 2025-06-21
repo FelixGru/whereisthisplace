@@ -1,82 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>App</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>app</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photos so we can locate them.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs access to your camera so you can take a new photo to find its location.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app needs access to your microphone if you choose to record a video with sound for geolocation.</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	
-	<!-- CRITICAL: Network permissions for map tile downloads -->
-	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
+		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
-	</dict>
-	
-	<!-- Local network for Flutter debugging -->
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>Allow the Flutter debugger to connect over the local network.</string>
-	<key>NSBonjourServices</key>
-	<array>
-		<string>_dartobservatory._tcp</string>
-		<string>_dartobservatory._udp</string>
-	</array>
-	
-	<!-- Location permissions -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Optional: Used only if you enable AR walk-to-spot navigation.</string>
-	<!-- NSLocationAlwaysAndWhenInUseUsageDescription removed - not needed unless tracking in background -->
-	<!-- <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>CFBundleDisplayName</key>
+		<string>App</string>
+		<key>CFBundleExecutable</key>
+		<string>$(EXECUTABLE_NAME)</string>
+		<key>CFBundleIdentifier</key>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
+		<key>CFBundleName</key>
+		<string>app</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$(FLUTTER_BUILD_NAME)</string>
+		<key>CFBundleSignature</key>
+		<string>????</string>
+		<key>CFBundleVersion</key>
+		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>LSRequiresIPhoneOS</key>
+		<true/>
+		<key>UIApplicationSupportsIndirectInputEvents</key>
+		<true/>
+		<key>UILaunchStoryboardName</key>
+		<string>LaunchScreen</string>
+		<key>UIMainStoryboardFile</key>
+		<string>Main</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app needs access to your photos so we can locate them.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>This app needs access to your camera so you can take a new photo to find its location.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>This app needs access to your microphone if you choose to record a video with sound for geolocation.</string>
+		<key>UISupportedInterfaceOrientations</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<key>UISupportedInterfaceOrientations~ipad</key>
+		<array>
+			<string>UIInterfaceOrientationPortrait</string>
+			<string>UIInterfaceOrientationPortraitUpsideDown</string>
+			<string>UIInterfaceOrientationLandscapeLeft</string>
+			<string>UIInterfaceOrientationLandscapeRight</string>
+		</array>
+		<!-- CRITICAL: Network permissions for map tile downloads -->
+		<key>NSAppTransportSecurity</key>
+		<dict>
+			<key>NSAllowsArbitraryLoads</key>
+			<true/>
+		</dict>
+		<!-- Local network for Flutter debugging -->
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>Allow the Flutter debugger to connect over the local network.</string>
+		<key>NSBonjourServices</key>
+		<array>
+			<string>_dartobservatory._tcp</string>
+			<string>_dartobservatory._udp</string>
+		</array>
+		<!-- Location permissions -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Optional: Used only if you enable AR walk-to-spot navigation.</string>
+		<!-- NSLocationAlwaysAndWhenInUseUsageDescription removed - not needed unless tracking in background -->
+		<!-- <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs access to location to show your position on the map.</string> -->
-	
-	<!-- Mapbox Access Token -->
-	<key>MBXAccessToken</key>
-	<string>pk.eyJ1IjoiZmVsaXhncnVlbmVyIiwiYSI6ImNtYXR2dXIwaDB2YjEyanNod2duemdjMnoifQ._ZPv79B7Ud5CfUSdbBn3Ww</string>
-</dict>
+		<!-- Mapbox Access Token -->
+		<key>MBXAccessToken</key>
+		<string>pk.eyJ1IjoiZmVsaXhncnVlbmVyIiwiYSI6ImNtYXR2dXIwaDB2YjEyanNod2duemdjMnoifQ._ZPv79B7Ud5CfUSdbBn3Ww</string>
+		<key>UIStatusBarHidden</key>
+		<false/>
+	</dict>
 </plist>
