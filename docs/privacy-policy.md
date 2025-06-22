@@ -21,7 +21,7 @@ This Privacy Policy describes how the WhereIsThisPlace application ("the App") h
 - **App Name**: WhereIsThisPlace
 - **Developer**: Essential AI
 - **Last Updated**: December 2024
-- **Contact Email**: whereisthisplace@essentialai.com
+- **Contact Email**: info@essentialai.com
 
 ## Your Rights
 You have the right to:
