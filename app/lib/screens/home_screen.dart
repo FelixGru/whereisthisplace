@@ -11,7 +11,7 @@ import '../providers/pro_provider.dart';
 import 'paywall_screen.dart';
 import 'result.dart';
 import 'settings.dart';
-import '../l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).home),
+        title: Text(AppLocalizations.of(context)!.home),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),

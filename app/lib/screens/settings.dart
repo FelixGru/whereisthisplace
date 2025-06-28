@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/settings_provider.dart';
 import '../providers/locale_provider.dart';
-import '../l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/engine.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -28,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
     final settings = context.watch<SettingsProvider>();
     final localeProvider = context.watch<LocaleProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).settings)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
       body: ListView(
         children: [
           ListTile(
@@ -64,12 +64,12 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           ListTile(
-            title: Text(AppLocalizations.of(context).privacyPolicy),
+            title: Text(AppLocalizations.of(context)!.privacyPolicy),
             trailing: const Icon(Icons.open_in_new),
             onTap: _openPolicy,
           ),
           ListTile(
-            title: Text(AppLocalizations.of(context).termsOfUse),
+            title: Text(AppLocalizations.of(context)!.termsOfUse),
             trailing: const Icon(Icons.open_in_new),
             onTap: _openTerms,
           ),

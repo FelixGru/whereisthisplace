@@ -6,7 +6,7 @@ import 'providers/locale_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/pro_provider.dart';
 import 'screens/home_screen.dart';      // ← this is already in the repo
-import 'l10n/app_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() => runApp(const WhereApp());
@@ -30,12 +30,7 @@ class WhereApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             locale: localeProvider.locale,
             supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: const [
-              AppLocalizationsDelegate(),
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               useMaterial3: true,

@@ -1,24 +1,23 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:app/main.dart';
 import 'package:app/screens/home_screen.dart';
+import 'package:app/screens/result.dart';
 import 'package:app/screens/settings.dart';
 import 'package:app/models/engine.dart';
+import 'package:app/models/result_model.dart';
 import 'package:app/providers/geo_provider.dart';
 import 'package:app/providers/locale_provider.dart';
 import 'package:app/providers/settings_provider.dart';
 import 'package:app/providers/pro_provider.dart';
-import 'package:app/l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
-import 'package:app/models/result_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:app/widgets/map_widget.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   testWidgets('Home screen has expected widgets', (WidgetTester tester) async {
