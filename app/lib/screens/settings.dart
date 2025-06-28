@@ -11,10 +11,16 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   static const _policyUrl =
-      'https://felixgru.github.io/whereisthisplace/';
+      'https://felixgru.github.io/whereisthisplace/privacy-policy.html';
+  static const _termsUrl =
+      'https://felixgru.github.io/whereisthisplace/terms-of-use.html';
 
   void _openPolicy() {
     launchUrl(Uri.parse(_policyUrl));
+  }
+
+  void _openTerms() {
+    launchUrl(Uri.parse(_termsUrl));
   }
 
   @override
@@ -61,6 +67,11 @@ class SettingsScreen extends StatelessWidget {
             title: Text(AppLocalizations.of(context).privacyPolicy),
             trailing: const Icon(Icons.open_in_new),
             onTap: _openPolicy,
+          ),
+          ListTile(
+            title: Text(AppLocalizations.of(context).termsOfUse),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: _openTerms,
           ),
           const Padding(
             padding: EdgeInsets.all(16),

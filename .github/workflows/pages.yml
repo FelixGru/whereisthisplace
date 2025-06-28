@@ -35,8 +35,50 @@ jobs:
       - name: Create index.html with privacy policy
         run: |
           mkdir -p _site
-          # Convert markdown to HTML using a simple approach
+          
+          # Create main index page with navigation
           cat > _site/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>WhereIsThisPlace - Legal Documents</title>
+              <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+                  h1 { color: #333; border-bottom: 2px solid #007AFF; padding-bottom: 10px; }
+                  h2 { color: #555; margin-top: 30px; }
+                  h3 { color: #666; margin-top: 20px; }
+                  strong { color: #007AFF; }
+                  .document-links { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
+                  .document-card { padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-decoration: none; color: inherit; transition: box-shadow 0.2s; }
+                  .document-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-decoration: none; color: inherit; }
+                  .document-card h3 { margin-top: 0; color: #007AFF; }
+                  .contact { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; }
+                  @media (max-width: 600px) { .document-links { grid-template-columns: 1fr; } }
+              </style>
+          </head>
+          <body>
+          EOF
+          
+          # Convert the index markdown to basic HTML
+          sed -e 's/^# \(.*\)/<h1>\1<\/h1>/' \
+              -e 's/^## \(.*\)/<h2>\1<\/h2>/' \
+              -e 's/^### \[\([^]]*\)\](\([^)]*\))/<div class="document-links"><a href="\2" class="document-card"><h3>\1<\/h3>/' \
+              -e 's/^\([^#].*\)/<p>\1<\/p>/' \
+              -e 's/^\*\*\([^*]*\)\*\*/<strong>\1<\/strong>/g' \
+              -e 's/^- \(.*\)/<li>\1<\/li>/' \
+              -e 's/^$/<br>/' \
+              docs/index.md >> _site/index.html
+          
+          cat >> _site/index.html << 'EOF'
+          </div></div>
+          </body>
+          </html>
+          EOF
+          
+          # Create Privacy Policy page
+          cat > _site/privacy-policy.html << 'EOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -48,21 +90,65 @@ jobs:
                   h1 { color: #333; border-bottom: 2px solid #007AFF; padding-bottom: 10px; }
                   h2 { color: #555; margin-top: 30px; }
                   strong { color: #007AFF; }
+                  .back-link { margin-bottom: 20px; }
+                  .back-link a { color: #007AFF; text-decoration: none; }
                   .contact { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; }
               </style>
           </head>
           <body>
+              <div class="back-link">
+                  <a href="index.html">← Back to Legal Documents</a>
+              </div>
           EOF
           
-          # Convert the markdown to basic HTML
+          # Convert the privacy policy markdown to basic HTML
           sed -e 's/^# \(.*\)/<h1>\1<\/h1>/' \
               -e 's/^## \(.*\)/<h2>\1<\/h2>/' \
               -e 's/^\*\*\([^*]*\)\*\*/<strong>\1<\/strong>/g' \
               -e 's/^- \(.*\)/<li>\1<\/li>/' \
               -e 's/^$/<br>/' \
-              docs/privacy-policy.md >> _site/index.html
+              docs/privacy-policy.md >> _site/privacy-policy.html
           
-          cat >> _site/index.html << 'EOF'
+          cat >> _site/privacy-policy.html << 'EOF'
+          </body>
+          </html>
+          EOF
+          
+          # Create Terms of Use page
+          cat > _site/terms-of-use.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>WhereIsThisPlace - Terms of Use</title>
+              <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+                  h1 { color: #333; border-bottom: 2px solid #007AFF; padding-bottom: 10px; }
+                  h2 { color: #555; margin-top: 30px; }
+                  h3 { color: #666; margin-top: 20px; }
+                  strong { color: #007AFF; }
+                  .back-link { margin-bottom: 20px; }
+                  .back-link a { color: #007AFF; text-decoration: none; }
+                  .contact { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px; }
+              </style>
+          </head>
+          <body>
+              <div class="back-link">
+                  <a href="index.html">← Back to Legal Documents</a>
+              </div>
+          EOF
+          
+          # Convert the terms of use markdown to basic HTML
+          sed -e 's/^# \(.*\)/<h1>\1<\/h1>/' \
+              -e 's/^## \(.*\)/<h2>\1<\/h2>/' \
+              -e 's/^### \(.*\)/<h3>\1<\/h3>/' \
+              -e 's/^\*\*\([^*]*\)\*\*/<strong>\1<\/strong>/g' \
+              -e 's/^- \(.*\)/<li>\1<\/li>/' \
+              -e 's/^$/<br>/' \
+              docs/terms-of-use.md >> _site/terms-of-use.html
+          
+          cat >> _site/terms-of-use.html << 'EOF'
           </body>
           </html>
           EOF

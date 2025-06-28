@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/pro_provider.dart';
 
@@ -12,8 +14,29 @@ class PaywallScreen extends StatefulWidget {
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
+  static const _policyUrl = 'https://felixgru.github.io/whereisthisplace/privacy-policy.html';
+  static const _termsUrl = 'https://felixgru.github.io/whereisthisplace/terms-of-use.html';
+  
   bool _isLoading = false;
   String? _errorMessage;
+  late StreamSubscription _errorSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to IAP errors to show them in UI
+    _errorSubscription = context.read<ProProvider>().iapService.errorStream.listen((error) {
+      setState(() {
+        _errorMessage = error;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _errorSubscription.cancel();
+    super.dispose();
+  }
 
   Future<void> _buyPro() async {
     setState(() {
@@ -59,6 +82,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  void _openPrivacyPolicy() async {
+    final uri = Uri.parse(_policyUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  void _openTermsOfUse() async {
+    final uri = Uri.parse(_termsUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     }
   }
 
@@ -195,12 +232,49 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 const SizedBox(height: 16),
                 
                 // Terms and Privacy
-                Text(
-                  'By subscribing, you agree to our Terms of Service and Privacy Policy. Subscription automatically renews unless canceled.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[500],
-                  ),
-                  textAlign: TextAlign.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    Text(
+                      'By subscribing, you agree to our ',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    GestureDetector(
+                      onTap: _openTermsOfUse,
+                      child: Text(
+                        'Terms of Service',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      ' and ',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: _openPrivacyPolicy,
+                      child: Text(
+                        'Privacy Policy',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '. Subscription automatically renews unless canceled.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
                 ),
                 
                 if (kDebugMode) ...[
